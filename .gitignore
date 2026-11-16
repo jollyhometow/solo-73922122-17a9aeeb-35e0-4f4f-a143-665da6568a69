@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# 本地虚拟环境 / 嵌入式 PostgreSQL 数据目录
+.venv/
+.pgdata/
+.pgrun/
+
+# 本地日志
+*.log

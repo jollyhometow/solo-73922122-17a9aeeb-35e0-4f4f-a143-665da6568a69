@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: meterdb
+    ports:
+      - "55438:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # 仅挂载只读 SQL, 表结构由 api 容器的迁移器幂等执行
+      - ./sql:/sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d meterdb"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/meterdb
+      POOL_MIN_SIZE: "2"
+      POOL_MAX_SIZE: "10"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["bash", "scripts/entrypoint.sh"]
+
+volumes:
+  pgdata:
